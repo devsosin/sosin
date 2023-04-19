@@ -4,7 +4,7 @@ import traceback
 class MariaDB:
 
     def __init__(self, db_config:dict, cursor_type="tuple") -> None:
-        '''
+        """
         생성자 메서드
         인스턴스 생성 시 db_config를 전달받아 DB에 연결합니다.
         
@@ -15,7 +15,7 @@ class MariaDB:
             password=사용자 암호
             database=데이터베이스 이름
             charset=문자 인코딩
-        '''
+        """
 
         db_config['port'] = int(db_config.get('port', '3306'))
         self.DB = pymysql.connect(**db_config)
@@ -28,18 +28,37 @@ class MariaDB:
         return
 
     def __del__(self):
-        '''
+        """
         인스턴스 소멸 시 DB 연결을 해제합니다.
-        '''
+        """
         self.DB.close()
         return
+    
+    def get_tables(self) -> list:
+        """
+        get table names
+        """
+        with self.DB.cursor() as cursor:
+            sql_qr = """show tables;"""
+            cursor.execute(sql_qr)
+            result = cursor.fetchall()
+        return [t[0] for t in result]
+    
+    def get_table_columns(self, table:str) -> tuple:
+        """
+        get table column infos
+        """
+        with self.DB.cursor() as cursor:
+            sql_qr = """SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name=%s"""
+            cursor.execute(sql_qr, table)
+            return cursor.fetchall()
     
     def custom_select(self, sql_qr:str, only_one=False) -> tuple:
         with self.DB.cursor() as cur:
             cur.execute(sql_qr)
             return cur.fetchone() if only_one else cur.fetchall()
 
-    def select(self, column_qry:str, table:str, limit=None, offset=None, order_by=None, where_condition=list[tuple]) -> tuple:
+    def select(self, column_qry:str, table:str, limit=None, offset=None, order_by=None, where_condition=[]) -> tuple:
         """
         Select
         예시) 
@@ -110,8 +129,6 @@ class MariaDB:
             traceback.print_exc()
             return False
 
-
-
     def update(self, table:str, set_column:str, set_value, where_column:str, where_value) -> bool:
         """
         Update
@@ -147,6 +164,22 @@ class MariaDB:
                 cur.execute(sql)
                 self.DB.commit()
             return True
+        except:
+            return False
+    
+    def truncate(self, table:str, forcing=True) -> bool:
+        """
+        truncate table
+        """
+        try:
+            with self.DB.cursor() as cursor:
+                cursor.execute(f'SET FOREIGN_KEY_CHECKS = {int(forcing)};')
+                self.DB.commit()
+                
+            with self.DB.cursor() as cursor:
+                cursor.execute(f'TRUNCATE TABLE {table};')
+                self.DB.commit()
+                return True
         except:
             return False
 

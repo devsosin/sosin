@@ -30,8 +30,8 @@ class WebContentManager:
         return self.r.content
 
 if __name__ == '__main__':
-    wfm = WebContentManager('https://media.classicmanager.com/album/aac/MM014-2/01.m4a')
+    wcm = WebContentManager('https://media.classicmanager.com/album/aac/MM014-2/01.m4a')
 
-    wfm.download('./music.m4a')
+    wcm.download('./music.m4a')
 
-    wfm.get_content_type()
+    wcm.get_content_type()
