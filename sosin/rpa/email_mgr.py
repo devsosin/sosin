@@ -254,6 +254,34 @@ class EmailManager:
         
         return False
 
+def _get_emails(email_id, email_pw, **kwargs):
+    """
+    kwargs
+    mail_server = ['gmail', 'naver']
+    header_subjects:list=[], header_since:str=None, header_from:str=None, 
+    label:str=None, save_path:str=None, 
+
+    remove_email=True,
+    encode_type='utf-8',
+    """
+    emgr = EmailManager(email_id, email_pw, mail_server=kwargs.pop('mail_server', 'naver'), mode='get')
+    emails = emgr.get_email(**kwargs)
+    del emgr
+    return emails
+
+def _send_email(email_id, email_pw, **kwargs):
+    """
+    kwargs
+    mail_server = ['gmail', 'naver']
+    from_user:str, to_users:list, 
+    subject:str, contents:list[Union[tuple, str]],
+    attachments:list=[], cc_targets=[]
+    """
+    emgr = EmailManager(email_id, email_pw, mail_server=kwargs.pop('mail_server', 'naver'))
+    result = emgr.send_email(**kwargs)
+    del emgr
+    return result
+
 if __name__ == '__main__':
     config = {
         'EMAIL_ID': 'your-email-id',
