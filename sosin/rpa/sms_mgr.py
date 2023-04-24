@@ -67,6 +67,44 @@ class AligoManager:
 
         return requests.post(send_url, data=data, files=image_file).json()['success_cnt']
 
+
+class TwilioManager:
+    """
+    Twilio Manager
+
+    """
+
+    def __init__(self, account_sid:str, auth_token:str, from_number:str) -> None:
+        """
+        twilio config
+        account_sid ACcff1...
+        auth_token e1a1...
+        from_number +1534...
+        """
+        try:
+            from twilio.rest import Client
+        except:
+            raise ImportError('twilio module not found.\nplease enter pip install twilio')
+            
+        self.client = Client(account_sid, auth_token)
+
+        self.from_ = from_number
+        pass
+
+    def send_sms(self, to:str, msg:str):
+        """
+        send_message
+        to - receiver (+4478600..)
+        msg - message
+        """
+        message = self.client.messages.create(
+            from_ = self.from_,
+            body = msg,
+            to = to,
+        )
+
+        return message.sid
+
 if __name__ == '__main__':
     config = {
         'ALIGO_KEY': 'aligo-api-key',
