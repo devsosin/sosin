@@ -65,8 +65,11 @@ class SessionManager:
         method = get, post, put
         files -> {key: file_path}
         """
+        headers = {k.lower(): headers[k] for k in headers}
+
         type_header = {}
-        if data:
+        if data and not no_parsing:
+            # charset?
             type_header['content-type'] = 'application/x-www-form-urlencoded'\
                 if type(data) == str else 'application/json;charset=UTF-8'
 
@@ -75,7 +78,7 @@ class SessionManager:
                 boundary = '----WebKitFormBoundary' +\
                     ''.join(random.sample(string.ascii_letters + string.digits, 16))
                 data = MultipartEncoder(fields={**data, **{k: self.get_file_form(v) for k, v in files.items()}}, boundary=boundary)
-                headers = {**headers, 'Content-Type': data.content_type, "Connection": "keep-alive"}
+                headers = {**headers, 'content-type': data.content_type, "connection": "keep-alive"}
 
             r = requests.post(url, headers={**self._headers, **type_header, **headers}, 
                               cookies={**self._cookies, **cookies}, 
@@ -92,8 +95,14 @@ class SessionManager:
     
     # ------------------------------------------------------------------------
     # Cookie Management
+    def add_cookies(self, cookies:dict) -> None:
+        self._cookies.update(cookies)
+
+    def get_cookie(self, k:str) -> str:
+        return self._cookies.get(k, '')
+
     def _set_cookies(self, r:requests.Response) -> None:
-        self._cookies = {**self._cookies, **dict(r.cookies)}
+        self._cookies.update(dict(r.cookies))
 
     def _reset_cookies(self, keys:list=[]) -> None:
         self._cookies = {k: self._cookies[k] for k in keys}
