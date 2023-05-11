@@ -16,14 +16,14 @@ class SessionManager:
 
     def __init__(self, cookie_path:str='./cookie', history_mode:bool=False) -> None:
         self._headers = { 'User-Agent': 'Mozilla/5.0' }
+        self._cookies = {}
         self._cookie_path = cookie_path
         self._mode = history_mode
         
         try:
             open(cookie_path, 'r')
             self._load_cookies()
-        except:
-            self._cookies = {}
+        except: pass
 
     def __del__(self):
         self._save_cookies()
