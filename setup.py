@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name                                = "sosin",
-    version                             = "1.1.2",
+    version                             = "1.1.3",
     license                             = 'MIT',
     author                              = "Jason Choi",
     author_email                        = "svstar94@gmail.com",

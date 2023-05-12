@@ -69,7 +69,7 @@ class VirtualDriver:
         if secret_mode:
             self.options.add_argument("--incognito")
 
-    def get_driver(self) -> webdriver.Chrome:
+    def get_driver(self):
         """
         셀레니움 웹드라이버 실행
         """
