@@ -1,6 +1,3 @@
-# python -m pip install selenium
-# python -m pip install webdriver-manager
-
 # ---------------------------------------------------------------------------------------------
 # Selnium Setting
 try:
@@ -8,13 +5,14 @@ try:
     from selenium.webdriver.chrome.service import Service
     from webdriver_manager.chrome import ChromeDriverManager
 except:
-    raise ImportError('you need to install selenium, webdriver-manager\n$ : python -m pip install selenium\n$ : python -m pip install webdriver-manager')
+    print('you need to install selenium, webdriver-manager\n$ : python -m pip install selenium webdriver-manager')
 
 class VirtualDriver:
     """
     Selenium VirtualDriver
     """
     def __init__(self, engine='chrome') -> None:
+
         self.engine = engine.lower().strip()
         if self.engine  == 'chrome':
             self.options = webdriver.ChromeOptions()
@@ -71,7 +69,7 @@ class VirtualDriver:
         if secret_mode:
             self.options.add_argument("--incognito")
 
-    def get_driver(self) -> webdriver.Chrome:
+    def get_driver(self):
         """
         셀레니움 웹드라이버 실행
         """
@@ -84,54 +82,41 @@ class VirtualDriver:
 
 # ---------------------------------------------------------------------------------------------
 # Selenium Utils
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.alert import Alert
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+try:
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.common.alert import Alert
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+except: pass
 
 import time
 
 MAX_RETRY_COUNT = 5
 def click_alert(d):
     """
-    알림창 처리
+    alert
     """
-    retry = 0
-    while True:
+    for _ in range(MAX_RETRY_COUNT):
         try:
             Alert(d).accept()
             break
-        except:
-            time.sleep(1)
-            retry+=1
+        except: time.sleep(1)
+    else: assert False, 'fail, alert not found'
 
-        if retry == MAX_RETRY_COUNT:
-            # 에러 발생
-            assert False, '알림창 클릭 실패 !!'
-
-# WebDriver 클래스로 webdriver 객체를 생성했다고 가정
 if __name__ == '__main__':
-    # 1. 예외처리문 활용
+    # 1. try-except
     try:
-        driver = webdriver.get_driver()
-
-        """
-        Code Blocks
-        """
+        driver = VirtualDriver().get_driver()
     except Exception as e:
         print(e)
     finally:
         driver.quit()
 
-    # 2. 클래스의 생성자, 소멸자 활용
+    # 2. class
     class MyWeb:
         def __init__(self):
-            self.driver = webdriver.get_driver()
+            self.driver = VirtualDriver().get_driver()
             
         def __del__(self):
             self.driver.quit()
-
-    """
-    Code Blocks
-    """

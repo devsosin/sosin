@@ -1,5 +1,8 @@
 import requests
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except:
+    print('you need to install BeautifulSoup4\n$ : python -m pip install BeautifulSoup4')
 
 country_list = [
     '미국', '유럽연합', '일본', '중국', '홍콩', '대만', '영국', '오만', '캐나다', 

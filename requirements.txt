@@ -8,3 +8,5 @@ requests-toolbelt
 soupsieve==2.4.1
 urllib3==1.26.15
 wincertstore==0.2
+selenium
+webdriver-manager
