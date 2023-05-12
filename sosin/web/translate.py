@@ -1,8 +1,11 @@
 import time
-
-from sosin.web.virtual import VirtualDriver, By, WebDriverWait, EC
+try:
+    from sosin.web.virtual import VirtualDriver, By, WebDriverWait, EC
+except:
+    pass
 
 def papago(txts:list[str]) -> list[str]:
+    
     """
     파파고 번역기
     """

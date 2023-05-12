@@ -1,4 +1,7 @@
-import pymysql
+try:
+    import pymysql
+except:
+    print('you need to install pymysql\n$ : python -m pip install pymysql')
 import traceback
 
 from typing import Iterable, Union
