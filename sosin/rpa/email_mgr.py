@@ -70,7 +70,9 @@ class EmailManager:
 
     def __del__(self) -> None:
         self.protocol.close()
-        self.protocol.logout()
+        # SMTP_SSL has no method logout
+        if type(self.protocol) != smtplib.SMTP_SSL:
+            self.protocol.logout()
 
     def get_email(self, header_subjects:list=[], header_since:str=None, header_from:str=None, 
                   label:str=None, encode_type='utf-8', save_path:str=None, remove_email=True
