@@ -210,7 +210,7 @@ class EmailManager:
         from_user: 보내는 사람의 이메일 주소
         to_users: 받는 사람의 이메일 주소들 (list)
         subject: 메일 제목
-        content: 메일 내용
+        content: 메일 내용 (list)
 
         **선택**
         attachments: 첨부 파일들 (파일경로 리스트)
@@ -244,6 +244,8 @@ class EmailManager:
                 msg['CC'] = ','.join(cc_targets)
             msg['Subject'] = subject
 
+            # if type contents is string -> 552 5.2.3 error
+            if type(contents) == str: contents = [contents]
             for content in contents:
                 # don't care content is str or tuple
                 msg.attach(MIMEText(content))
