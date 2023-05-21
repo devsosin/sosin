@@ -270,6 +270,75 @@ class MariaDB:
                 return True
         except:
             return False
+        
+    # Procedure
+    # unavailable
+    def make_procedure(self, sp_name:str, inputs:list[tuple], outputs: list[tuple], variables:list[tuple], queries:list[tuple],):
+        """
+        inputs: [(input_name, dtype)]
+        outputs: [(output_name, dtype)]
+        varaibles: [(var_name, dtype)]
+        """
+        return None
+        # ASSERT variables IN inputs
+
+        input_str = ', '.join([' '.join(ip) for ip in inputs])
+        if not [out for out in outputs if out[0] == 'RESULT']:
+            outputs += [('RESULT', 'INT')]
+        output_str = (', ' + ', '.join(['OUT ' + ' '.join(out) for out in outputs])) if outputs else ''
+        variable_str = '\n'.join('DECLARE {} {};'.format(*var) for var in variables)
+
+        query_strs = []
+        for query in queries:
+            if query[0].lower() == 'select':
+                # select query
+                query_strs.append(f'SELECT {query[1]} INTO {query[4]} FROM {query[2]} WHERE {query[3]} LIMIT 1;')
+            elif query[0].lower() == 'insert':
+                # insert query
+                query_strs.append(f'INSERT INTO {query[2]}({query[1]}) VALUES ({query[3]});')
+        
+        query_str = '\n'.join(query_strs)
+        
+        query = f"""DELIMITER $$
+        CREATE PROCEDURE `{sp_name}`({input_str}{output_str})
+        BEGIN
+            {variable_str}
+            DECLARE exit handler for SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+                SET RESULT = 0;  
+            END;
+        
+        START TRANSACTION;
+            {query_str}
+            COMMIT;
+            SET RESULT = 1;
+        END$$"""
+        
+        with self.DB.cursor() as cursor:
+            # do not work
+            cursor.execute(query)
+            self.DB.commit()
+        return query
+    # sample
+    # self.make_procedure('sp_insert_order2', 
+    # inputs=[('_oc_id', 'INT'), ('_commerce_id', 'TINYINT'), ('_sub_id', 'VARCHAR(32)'), ('_order_date', 'DATETIME'), 
+    # ('_progress', 'VARCHAR(32)'), ('_quantity', 'INT'), ('_total_amount', 'INT'), ('_cal_amount', 'INT'), ('_buyer_name', 'VARCHAR(32)'), 
+    # ('_buyer_phone', 'VARCHAR(32)'), ('_receiver_name', 'VARCHAR(32)'), ('_receiver_phone', 'VARCHAR(32)'), ('_receiver_address', 'VARCHAR(32)'), 
+    # ('_PCC', 'VARCHAR(32)'), ('_product_id', 'VARCHAR(32)')], outputs=[], variables=[('_sp_id', 'INT')], 
+    # queries=[('select', 'id', 'StoreProduct', 'sub_id=_product_id', '_sp_id'), 
+    # ('insert', 'oc_id,sp_id,commerce_id,sub_id,order_date,progress,quantity,total_amount,cal_amount,buyer_name,buyer_phone,\
+    # receiver_name,receiver_phone,receiver_address,PCC', 'OrderDetail', '_oc_id, _sp_id, _commerce_id, _sub_id, _order_date,\
+    # _progress, _quantity, _total_amount, _cal_amount,_buyer_name,_buyer_phone, _receiver_name, _receiver_phone, \
+    # _receiver_address, _PCC')])
+    
+    def call_procedure(self, sp_name:str, inputs:list, outputs:list[str]=['RESULT']):
+        output_str = (',' + ','.join(['@'+output for output in outputs])) if outputs else ''
+
+        with self.DB.cursor() as cursor:
+            result = cursor.executemany(f'CALL {sp_name}('+','.join(["%s"]*len(inputs[0])) + output_str +');', 
+                                        [self.make_values(o) for o in inputs])
+        return result
 
     @staticmethod
     def make_columns(data: dict) -> str:
