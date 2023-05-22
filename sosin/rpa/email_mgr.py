@@ -17,6 +17,8 @@ from datetime import datetime
 import traceback
 from typing import Union
 
+from dataclasses import dataclass
+
 def _is_ascii(s):
     '''
     ASCII 체크
@@ -41,7 +43,12 @@ def _get_body(msg):
         return _get_body(msg.get_payload(0))
     else:
         return msg.get_payload(None, True)
-    
+
+@dataclass
+class EmailAccount:
+    email_id: str
+    email_pw: str
+
 class EmailManager:
     """
     Email Manager
@@ -258,6 +265,7 @@ class EmailManager:
         
         return False
 
+# deprecated
 def _get_emails(email_id, email_pw, **kwargs):
     """
     kwargs
@@ -273,6 +281,7 @@ def _get_emails(email_id, email_pw, **kwargs):
     del emgr
     return emails
 
+# deprecated
 def _send_email(email_id, email_pw, **kwargs):
     """
     kwargs
@@ -285,6 +294,26 @@ def _send_email(email_id, email_pw, **kwargs):
     result = emgr.send_email(**kwargs)
     del emgr
     return result
+
+class GmailManager(EmailManager):
+    def __init__(self, email_id, email_pw, mode='send') -> None:
+        super().__init__(email_id, email_pw, 'gmail', mode)
+
+class NaverManager(EmailManager):
+    def __init__(self, email_id, email_pw, mode='send') -> None:
+        super().__init__(email_id, email_pw, 'naver', mode)
+
+def send_with_gmail(email_id, email_pw, **kwargs):
+    return GmailManager(email_id, email_pw).send_email(**kwargs)
+
+def send_with_naver(email_id, email_pw, **kwargs):
+    return NaverManager(email_id, email_pw).send_email(**kwargs)
+
+def get_with_gmail(email_id, email_pw, **kwargs):
+    return GmailManager(email_id, email_pw).get_email(**kwargs)
+
+def get_with_naver(email_id, email_pw, **kwargs):
+    return NaverManager(email_id, email_pw).get_email(**kwargs)
 
 if __name__ == '__main__':
     config = {
