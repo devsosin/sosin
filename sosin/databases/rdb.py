@@ -149,12 +149,12 @@ class MariaDB:
         table = "Students"
         """
         sql_qr = "SELECT {0} FROM {1}".format(column_qry, table)
+        if order_by:
+            sql_qr += ' ORDER BY {}'.format(order_by)
         if limit:
             sql_qr += ' LIMIT {}'.format(limit)
         if offset:
             sql_qr += ' OFFSET {}'.format(offset)
-        if order_by:
-            sql_qr += ' ORDER BY {}'.format(order_by)
         if where_condition:
             for i, (col, eq, val) in enumerate(where_condition):
                 is_equal = '=' if eq else '!='
