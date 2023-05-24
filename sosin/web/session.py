@@ -56,6 +56,14 @@ class SessionManager:
             self.history.append(r)
         return r
 
+    def patch(self, url:str, headers:dict={}, cookies:dict={}, 
+                 data:Union[str, dict, list]={}, files:dict[str]={}, **kwargs):
+        r = self._request(url, headers=headers, cookies=cookies, data=data, files=files, method='patch', **kwargs)
+
+        if self._mode:
+            self.history.append(r)
+        return r
+
     def _request(self, url:str, headers:dict={}, cookies:dict={}, 
                  data:Union[str, dict]={}, files:dict[str]={}, 
                  method:str='post', no_parsing:bool=False, **kwargs) -> requests.Response:
@@ -89,7 +97,10 @@ class SessionManager:
         elif method.lower() == 'put':
             r = requests.put(url, headers={**self._headers, **type_header, **headers}, 
                              cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
-        
+        elif method.lower() == 'patch':
+            r = requests.patch(url, headers={**self._headers, **type_header, **headers},
+                             cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
+            
         self._set_cookies(r)
         return r
     
