@@ -69,12 +69,12 @@ class VirtualDriver:
         if secret_mode:
             self.options.add_argument("--incognito")
 
-    def get_driver(self):
+    def get_driver(self, version=None):
         """
         셀레니움 웹드라이버 실행
         """
         if self.engine == 'chrome':
-            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=self.options)
+            driver = webdriver.Chrome(service=Service(ChromeDriverManager(version=version).install()), options=self.options)
             driver.maximize_window()
             driver.implicitly_wait(5)
             return driver
