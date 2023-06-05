@@ -8,6 +8,7 @@ def read_config(config_path:str, splitter:str='=', encoding=None) -> dict:
     temp = {}
     with open(config_path, 'r', encoding=encoding) as f:
         for l in f.readlines():
-            k, v = l.rstrip().split(splitter)
+            idx = l.find(splitter)
+            k, v = l[:idx], l[idx+1:]
             temp[k] = v
     return temp

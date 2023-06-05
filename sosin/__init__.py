@@ -1,4 +1,4 @@
-__version__ = '1.1.9'
+__version__ = '1.2.0'
 
 from .rpa.email_mgr import EmailManager
 from .rpa.sms_mgr import AligoManager
