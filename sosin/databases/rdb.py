@@ -215,20 +215,22 @@ class MariaDB:
             self.DB.rollback()
             return False
 
-    def update(self, table:str, set_column:str, set_value, where_column:str, where_value) -> bool:
+    def update(self, table:str, set_columns:list[str], set_values:list[str], where_column:str, where_value) -> bool:
         """
         Update
         
         example)
         table = "Students"
-        set_column = "name"
-        set_value = "jason"
+        set_column = ["name"]
+        set_value = ["jason"]
         where_column = "id"
         where_value = "1"
         """
-        sql = "UPDATE {0}" \
-            "SET {1}={2}" \
-            "WHERE {3}={4};".format(table, set_column, set_value, where_column, where_value)
+
+        set_statement = ', '.join('{}="{}"'.format(sc, sv) for sc, sv in zip(set_columns, set_values))
+        sql = "UPDATE {0} " \
+            "SET {1} " \
+            "WHERE {2}={3};".format(table, set_statement, where_column, where_value)
         try:
             with self.DB.cursor() as cur:
                 cur.execute(sql)
