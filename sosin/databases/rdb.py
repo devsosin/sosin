@@ -191,7 +191,7 @@ class MariaDB:
             return False
     
     # values는 list 형식으로 넣었음, args로 함
-    def insert_many(self, table:str, columns: str, values: list) -> bool:
+    def insert_many(self, table:str, columns: str, values: list, ignore:bool=False) -> bool:
         """
         Insert Many Datas
         
@@ -203,7 +203,8 @@ class MariaDB:
             ...
         ]
         """
-        sql = f"INSERT INTO {table}({columns}) " \
+        ignore_sql = 'IGNORE ' if ignore else ''
+        sql = f"INSERT {ignore_sql} INTO {table}({columns}) " \
                   "VALUES ("  + ','.join(["%s"]*len(values[0])) + ");"
         try:
             with self.DB.cursor() as cur:
