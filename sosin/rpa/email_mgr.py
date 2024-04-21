@@ -208,7 +208,7 @@ class EmailManager:
     # 이메일 발송 함수
     def send_email(self, from_user:str, to_users:list, 
                    subject:str, contents:list[Union[tuple, str]],
-                   attachments:list=[], cc_targets=[]
+                   attachments:list=[], cc_targets=[], is_html=False,
                    ) -> bool:
         '''
         메일을 발송하는 함수입니다.
@@ -255,7 +255,7 @@ class EmailManager:
             if type(contents) == str: contents = [contents]
             for content in contents:
                 # don't care content is str or tuple
-                msg.attach(MIMEText(content))
+                msg.attach(MIMEText(content, 'html' if is_html else 'plain'))
 
             self.protocol.sendmail(from_user, set(to_users+cc_targets), msg.as_string())
             return True

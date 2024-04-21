@@ -116,7 +116,7 @@ class MariaDB:
         """
         get table names
         """
-        with self.DB.cursor() as cursor:
+        with self.DB.cursor(self.cursor_type) as cursor:
             sql_qr = 'show tables;'
             cursor.execute(sql_qr)
             result = cursor.fetchall()
@@ -126,7 +126,7 @@ class MariaDB:
         """
         get table column infos
         """
-        with self.DB.cursor() as cursor:
+        with self.DB.cursor(self.cursor_type) as cursor:
             sql_qr = 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name=%s'
             cursor.execute(sql_qr, table)
             
@@ -135,7 +135,7 @@ class MariaDB:
                      } for field in cursor.fetchall()]
     
     def custom_select(self, sql_qr:str, only_one=False) -> tuple:
-        with self.DB.cursor() as cur:
+        with self.DB.cursor(self.cursor_type) as cur:
             cur.execute(sql_qr)
             return cur.fetchone() if only_one else cur.fetchall()
 
@@ -162,7 +162,7 @@ class MariaDB:
             sql_qr += ' OFFSET {}'.format(offset)
 
 
-        with self.DB.cursor() as cur:
+        with self.DB.cursor(self.cursor_type) as cur:
             cur.execute(sql_qr)
             return cur.fetchall()
 
@@ -318,7 +318,7 @@ class MariaDB:
             SET RESULT = 1;
         END$$"""
         
-        with self.DB.cursor() as cursor:
+        with self.DB.cursor(self.cursor_type) as cursor:
             # do not work
             cursor.execute(query)
             self.DB.commit()
@@ -338,7 +338,7 @@ class MariaDB:
     def call_procedure(self, sp_name:str, inputs:list, outputs:list[str]=['RESULT']):
         output_str = (',' + ','.join(['@'+output for output in outputs])) if outputs else ''
 
-        with self.DB.cursor() as cursor:
+        with self.DB.cursor(self.cursor_type) as cursor:
             result = cursor.executemany(f'CALL {sp_name}('+','.join(["%s"]*len(inputs[0])) + output_str +');', 
                                         [self.make_values(o) for o in inputs])
         return result
