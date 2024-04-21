@@ -4,6 +4,7 @@ try:
     from selenium import webdriver
     from selenium.webdriver.chrome.service import Service
     from webdriver_manager.chrome import ChromeDriverManager
+    from webdriver_manager.core.os_manager import ChromeType
 except:
     print('you need to install selenium, webdriver-manager\n$ : python -m pip install selenium webdriver-manager')
 
@@ -69,12 +70,14 @@ class VirtualDriver:
         if secret_mode:
             self.options.add_argument("--incognito")
 
-    def get_driver(self, version=None):
+    def get_driver(self, is_chromium=False):
         """
         셀레니움 웹드라이버 실행
         """
         if self.engine == 'chrome':
-            driver = webdriver.Chrome(service=Service(ChromeDriverManager(version=version).install()), options=self.options)
+            driver = webdriver.Chrome(service=Service(
+                ChromeDriverManager(chrome_type=ChromeType.CHROMIUM if is_chromium else ChromeType.GOOGLE).install()), 
+                options=self.options)
             driver.maximize_window()
             driver.implicitly_wait(5)
             return driver
