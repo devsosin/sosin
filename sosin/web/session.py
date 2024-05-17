@@ -119,7 +119,10 @@ class SessionManager:
         self._cookies = {k: self._cookies[k] for k in keys}
     
     def _save_cookies(self) -> None:
-        open(self._cookie_path, 'w').write('\n'.join(['{}={}'.format(k, v) for k, v in self._cookies.items()]))
+        try:
+            open(self._cookie_path, 'w').write('\n'.join(['{}={}'.format(k, v) for k, v in self._cookies.items()]))
+        except:
+            ...
         
     def _load_cookies(self) -> dict:
         for l in open(self._cookie_path, 'r').readlines():
