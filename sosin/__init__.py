@@ -1,9 +1,10 @@
-__version__ = '1.2.6'
+__version__ = '1.2.7'
 
 from .rpa.email_mgr import EmailManager
 from .rpa.sms_mgr import AligoManager
 
 from .web.session import SessionManager
+from .web.session_async import AsyncSessionManager
 from .web.virtual import VirtualDriver
 
 from .utils.secret import read_config

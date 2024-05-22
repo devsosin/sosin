@@ -2,3 +2,4 @@ beautifulsoup4
 PyMySQL
 selenium
 webdriver-manager
+httpx
