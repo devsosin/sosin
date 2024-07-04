@@ -1,4 +1,7 @@
-__version__ = '1.2.8'
+__version__ = '1.2.9'
+
+from .databases.rdb.maria import MariaDB
+from .databases.rdb.postgre import PostgreSQL
 
 from .rpa.email_mgr import EmailManager
 from .rpa.sms_mgr import AligoManager
