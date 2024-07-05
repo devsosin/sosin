@@ -63,6 +63,13 @@ class AsyncSessionManager:
         if self._mode:
             self.history.append(r)
         return r
+    async def delete(self, url:str, headers:dict={}, cookies:dict={}, 
+                 data:Union[str, dict, list]={}, files:dict[str]={}, **kwargs):
+        r = await self._request(url, headers=headers, cookies=cookies, data=data, files=files, method='delete', **kwargs)
+
+        if self._mode:
+            self.history.append(r)
+        return r
 
     async def _request(self, url:str, headers:dict={}, cookies:dict={}, 
                  data:Union[str, dict]={}, files:dict[str]={}, 
@@ -100,6 +107,9 @@ class AsyncSessionManager:
                                 cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
             elif method.lower() == 'patch':
                 r = await client.patch(url, headers={**self._headers, **type_header, **headers},
+                                cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
+            elif method.lower() == 'delete':
+                r = await client.delete(url, headers={**self._headers, **type_header, **headers},
                                 cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
             
         self._set_cookies(r)

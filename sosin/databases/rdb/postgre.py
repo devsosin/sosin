@@ -1,12 +1,12 @@
 try:
     import psycopg2
+    from psycopg2.extras import RealDictCursor
 except:
     print('you need to install psycopg2\n$ : python -m pip install psycopg2')
 
 from typing import Iterable
 
 from sosin.databases.db import Database
-from psycopg2.extras import RealDictCursor
 
 class PostgreSQL(Database):
 

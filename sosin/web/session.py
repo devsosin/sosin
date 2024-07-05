@@ -63,6 +63,14 @@ class SessionManager:
         if self._mode:
             self.history.append(r)
         return r
+    
+    def delete(self, url:str, headers:dict={}, cookies:dict={}, 
+                 data:Union[str, dict, list]={}, files:dict[str]={}, **kwargs):
+        r = self._request(url, headers=headers, cookies=cookies, data=data, files=files, method='delete', **kwargs)
+
+        if self._mode:
+            self.history.append(r)
+        return r
 
     def _request(self, url:str, headers:dict={}, cookies:dict={}, 
                  data:Union[str, dict]={}, files:dict[str]={}, 
@@ -74,7 +82,10 @@ class SessionManager:
         files -> {key: file_path}
         """
         headers = {k.lower(): headers[k] for k in headers}
+        # data -> str
+        # json -> list or dict
 
+        # 이거 필요없을듯
         type_header = {}
         if data and not no_parsing:
             # charset?
@@ -99,6 +110,9 @@ class SessionManager:
                              cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
         elif method.lower() == 'patch':
             r = requests.patch(url, headers={**self._headers, **type_header, **headers},
+                             cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
+        elif method.lower() == 'delete':
+            r = requests.delete(url, headers={**self._headers, **type_header, **headers},
                              cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
             
         self._set_cookies(r)

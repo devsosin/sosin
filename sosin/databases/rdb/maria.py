@@ -1,5 +1,6 @@
 try:
     import pymysql
+    from pymysql.cursors import DictCursor
 except:
     print('you need to install pymysql\n$ : python -m pip install pymysql')
 import traceback
@@ -7,8 +8,6 @@ import traceback
 from typing import Iterable, Union
 
 from sosin.databases.db import Database
-
-from pymysql.cursors import DictCursor
 
 class MariaDB(Database):
     """
