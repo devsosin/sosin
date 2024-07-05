@@ -88,7 +88,7 @@ class AsyncSessionManager:
             type_header['content-type'] = 'application/x-www-form-urlencoded'\
                 if type(data) == str else 'application/json;charset=UTF-8'
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(verify=kwargs.pop('verify', True)) as client:
             if method.lower() == 'post':
                 if files:
                     boundary = '----WebKitFormBoundary' +\
