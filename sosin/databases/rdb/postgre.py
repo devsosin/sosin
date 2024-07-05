@@ -101,7 +101,7 @@ class PostgreSQL(Database):
     def update(self, table, columns, values, where_info) -> bool:
         assert len(columns) == len(values), "칼럼 길이와 값의 길이가 다릅니다."
 
-        query = f'UPDATE {table}\nSET'
+        query = f'UPDATE {table}\nSET '
         set_query = '\n'.join(f'{column}=%s' for column in columns)
         query += set_query
 
@@ -111,7 +111,7 @@ class PostgreSQL(Database):
         return super().update(query, values)
 
     def delete(self, table, where_info):
-        query = f'DELETE FROM {table};'
+        query = f'DELETE FROM {table}'
         query += self.where(*where_info)
         query += ';'
         return super().delete(query)

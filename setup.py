@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name                                = "sosin",
-    version                             = "1.3.6",
+    version                             = "1.3.8",
     license                             = 'MIT',
     author                              = "Jason Choi",
     author_email                        = "sosincomp@gmail.com",
@@ -10,7 +10,7 @@ setuptools.setup(
     long_description                    = open('README.md').read(),
     url                                 = "https://github.com/devsosin/sosin",
     install_requires                    = ['requests', 'requests-toolbelt', 'httpx'],
-    packages                            = setuptools.find_namespace_packages(include=['sosin', 'sosin.*']),
+    packages                            = setuptools.find_namespace_packages(include=['*']),
     python_requires                     = '>=3.9',
     classifiers                         = [
         "Programming Language :: Python :: 3",
