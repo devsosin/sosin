@@ -107,13 +107,13 @@ class SessionManager:
                              cookies={**self._cookies, **cookies}, **kwargs)
         elif method.lower() == 'put':
             r = requests.put(url, headers={**self._headers, **type_header, **headers}, 
-                             cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
+                             cookies={**self._cookies, **cookies}, data=data, **kwargs)
         elif method.lower() == 'patch':
             r = requests.patch(url, headers={**self._headers, **type_header, **headers},
-                             cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
+                             cookies={**self._cookies, **cookies}, data=data, **kwargs)
         elif method.lower() == 'delete':
             r = requests.delete(url, headers={**self._headers, **type_header, **headers},
-                             cookies={**self._cookies, **cookies}, data=json.dumps(data), **kwargs)
+                             cookies={**self._cookies, **cookies}, data=data, **kwargs)
             
         self._set_cookies(r)
         return r
