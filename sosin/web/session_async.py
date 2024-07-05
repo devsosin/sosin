@@ -98,7 +98,7 @@ class AsyncSessionManager:
 
                 r = await client.post(url, headers={**self._headers, **type_header, **headers}, 
                                 cookies={**self._cookies, **cookies}, 
-                                data=data if type(data) in [str, MultipartEncoder] or no_parsing else json.dumps(data), **kwargs)
+                                data=data if type(data) in [str, MultipartEncoder, bytes] or no_parsing else json.dumps(data), **kwargs)
             elif method.lower() == 'get':
                 r = await client.get(url, headers={**self._headers, **type_header, **headers}, 
                                 cookies={**self._cookies, **cookies}, **kwargs)

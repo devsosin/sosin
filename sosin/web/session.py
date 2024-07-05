@@ -101,7 +101,7 @@ class SessionManager:
 
             r = requests.post(url, headers={**self._headers, **type_header, **headers}, 
                               cookies={**self._cookies, **cookies}, 
-                              data=data if type(data) in [str, MultipartEncoder] or no_parsing else json.dumps(data), **kwargs)
+                              data=data if type(data) in [str, MultipartEncoder, bytes] or no_parsing else json.dumps(data), **kwargs)
         elif method.lower() == 'get':
             r = requests.get(url, headers={**self._headers, **type_header, **headers}, 
                              cookies={**self._cookies, **cookies}, **kwargs)

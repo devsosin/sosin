@@ -1,4 +1,4 @@
-__version__ = '1.3.9'
+__version__ = '1.4.0'
 
 from .databases.rdb.maria import MariaDB
 from .databases.rdb.postgre import PostgreSQL
