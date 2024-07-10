@@ -102,7 +102,7 @@ class PostgreSQL(Database):
         assert len(columns) == len(values), "칼럼 길이와 값의 길이가 다릅니다."
 
         query = f'UPDATE {table}\nSET '
-        set_query = '\n'.join(f'{column}=%s' for column in columns)
+        set_query = ',\n'.join(f'{column}=%s' for column in columns)
         query += set_query
 
         # where 도 %s로 안전하게?
