@@ -1,4 +1,3 @@
-import json
 import random
 import string
 
@@ -7,139 +6,170 @@ from typing import BinaryIO, Union
 import httpx
 from requests_toolbelt import MultipartEncoder
 
-class AsyncSessionManager:
+from .cookie import CookieManager
+from sosin.utils.history import HistoryManager
+
+class AsyncSessionManager(CookieManager):
     """
     Session Manager
     """
 
     history:list[httpx.Response] = []
 
-    def __init__(self, cookie_path:str='./cookie', history_mode:bool=False) -> None:
+    def __init__(self, cookie_path:str=None, history_mode:bool=False) -> None:
         self._headers = { 'User-Agent': 'Mozilla/5.0' }
-        self._cookies = {}
-        self._cookie_path = cookie_path
-        self._mode = history_mode
-        
-        try:
-            open(cookie_path, 'r')
-            self._load_cookies()
-        except: pass
-
-    def __del__(self):
-        self._save_cookies()
+        super().__init__(cookie_path)
+        self.history_manager = HistoryManager() if history_mode else None
     
     # ------------------------------------------------------------------------
     # Request Management
-    async def get(self, url:str, headers:dict={}, cookies:dict={}, **kwargs) -> httpx.Response:
-        r = await self._request(url, headers=headers, cookies=cookies, method='get', **kwargs)
-
-        if self._mode:
-            self.history.append(r)
+    async def get(self, 
+                  url:str, 
+                  headers:dict={}, 
+                  cookies:dict={}, 
+                  params:dict={}, 
+                  **kwargs
+                  ) -> httpx.Response:
+        
+        r = await self._request(url, headers=headers, cookies=cookies, params=params,
+                                method='get', **kwargs)
         return r
 
-    async def post(self, url:str, headers:dict={}, cookies:dict={}, 
-                data:Union[str, dict]={}, files:dict[str]={}, 
-                no_parsing:bool=False, **kwargs) -> httpx.Response:
+    async def post(self, 
+                   url:str, 
+                   headers:dict={}, 
+                   cookies:dict={}, 
+                   params:dict={},
+                   data:Union[str, dict]={}, 
+                   json:Union[dict, list]=None, 
+                   files:dict[str]={}, 
+                   **kwargs
+                   ) -> httpx.Response:
         
-        r = await self._request(url, headers=headers, cookies=cookies, data=data, files=files, 
-                          no_parsing=no_parsing, method='post', **kwargs)
-
-        if self._mode:
-            self.history.append(r)
+        r = await self._request(url, headers=headers, cookies=cookies, params=params, 
+                                data=data, files=files, json=json,
+                                method='post', **kwargs)
         return r
     
-    async def put(self, url:str, headers:dict={}, cookies:dict={}, 
-                 data:Union[str, dict, list]={}, files:dict[str]={}, **kwargs):
-        r = await self._request(url, headers=headers, cookies=cookies, data=data, files=files, method='put', **kwargs)
-
-        if self._mode:
-            self.history.append(r)
+    async def put(self, 
+                  url:str, 
+                  headers:dict={}, 
+                  cookies:dict={}, 
+                  params:dict={},
+                  data:Union[str, dict, list]={}, 
+                  json:Union[dict, list]=None, 
+                  files:dict[str]={}, **kwargs
+                  ) -> httpx.Response:
+        
+        r = await self._request(url, 
+                                headers=headers, cookies=cookies, params=params, 
+                                data=data, json=json, files=files, 
+                                method='put', **kwargs)
         return r
 
-    async def patch(self, url:str, headers:dict={}, cookies:dict={}, 
-                 data:Union[str, dict, list]={}, files:dict[str]={}, **kwargs):
-        r = await self._request(url, headers=headers, cookies=cookies, data=data, files=files, method='patch', **kwargs)
-
-        if self._mode:
-            self.history.append(r)
+    async def patch(self, 
+                    url:str, 
+                    headers:dict={}, 
+                    cookies:dict={}, 
+                    params:dict={},
+                    data:Union[str, dict, list]={}, 
+                    json:Union[list, dict]=None, 
+                    files:dict[str]={}, 
+                    **kwargs
+                    ) -> httpx.Response:
+        
+        r = await self._request(url, 
+                                headers=headers, cookies=cookies, params=params, 
+                                data=data, json=json, files=files, 
+                                method='patch', **kwargs)
         return r
-    async def delete(self, url:str, headers:dict={}, cookies:dict={}, 
-                 data:Union[str, dict, list]={}, files:dict[str]={}, **kwargs):
-        r = await self._request(url, headers=headers, cookies=cookies, data=data, files=files, method='delete', **kwargs)
-
-        if self._mode:
-            self.history.append(r)
+    async def delete(self, 
+                     url:str, 
+                     headers:dict={}, 
+                     cookies:dict={}, 
+                     params:dict={},
+                     data:Union[str, dict, list]={}, 
+                     json:Union[list, dict]=None, 
+                     files:dict[str]={}, 
+                     **kwargs
+                     ) -> httpx.Response:
+        
+        r = await self._request(url, 
+                                headers=headers, cookies=cookies, params=params, 
+                                data=data, json=json, files=files, 
+                                method='delete', **kwargs)
         return r
 
-    async def _request(self, url:str, headers:dict={}, cookies:dict={}, 
-                 data:Union[str, dict]={}, files:dict[str]={}, 
-                 method:str='post', no_parsing:bool=False, **kwargs) -> httpx.Response:
+    async def _request(self, 
+                       url:str, 
+                       headers:dict={}, 
+                       cookies:dict={}, 
+                       params:dict={}, 
+                       data:Union[str, dict]={}, 
+                       json:Union[dict, list]=None, 
+                       files:dict[str]={}, 
+                       method:str='post', 
+                       **kwargs
+                       ) -> httpx.Response:
         """
-        request
-
-        method = get, post, put
         files -> {key: file_path}
         """
+        
         headers = {k.lower(): headers[k] for k in headers}
 
         type_header = {}
-        if data and not no_parsing:
-            # charset?
-            type_header['content-type'] = 'application/x-www-form-urlencoded'\
-                if type(data) == str else 'application/json;charset=UTF-8'
+        if data:
+            type_header['content-type'] = 'application/x-www-form-urlencoded'
+        if json:
+            type_header['content-type'] = 'application/json;charset=UTF-8'
+        if files:
+            boundary = '----WebKitFormBoundary' +\
+                ''.join(random.sample(string.ascii_letters + string.digits, 16))
+            data = MultipartEncoder(fields={**data, **{k: self.get_file_form(v) for k, v in files.items()}}, boundary=boundary)
+            type_header['content-type'] = data.content_type
+            type_header['connection'] = 'keep-alive'
 
         async with httpx.AsyncClient(verify=kwargs.pop('verify', True)) as client:
-            if method.lower() == 'post':
-                if files:
-                    boundary = '----WebKitFormBoundary' +\
-                        ''.join(random.sample(string.ascii_letters + string.digits, 16))
-                    data = MultipartEncoder(fields={**data, **{k: self.get_file_form(v) for k, v in files.items()}}, boundary=boundary)
-                    headers = {**headers, 'content-type': data.content_type, "connection": "keep-alive"}
-
-                r = await client.post(url, headers={**self._headers, **type_header, **headers}, 
-                                cookies={**self._cookies, **cookies}, 
-                                data=data if type(data) in [str, MultipartEncoder, bytes] or no_parsing else json.dumps(data), **kwargs)
-            elif method.lower() == 'get':
-                r = await client.get(url, headers={**self._headers, **type_header, **headers}, 
-                                cookies={**self._cookies, **cookies}, **kwargs)
+            if method.lower() == 'get':
+                r = await client.get(url, 
+                                     headers={**self._headers, **type_header, **headers}, 
+                                     cookies={**self._cookies, **cookies}, 
+                                     params=params, **kwargs)
+            elif method.lower() == 'post':
+                r = await client.post(url, 
+                                      headers={**self._headers, **type_header, **headers},
+                                      cookies={**self._cookies, **cookies},
+                                      params=params, data=data, json=json, **kwargs)
             elif method.lower() == 'put':
-                r = await client.put(url, headers={**self._headers, **type_header, **headers}, 
-                                cookies={**self._cookies, **cookies}, data=data, **kwargs)
+                r = await client.put(url, 
+                                     headers={**self._headers, **type_header, **headers},
+                                     cookies={**self._cookies, **cookies}, 
+                                     params=params, data=data, json=json, **kwargs)
             elif method.lower() == 'patch':
-                r = await client.patch(url, headers={**self._headers, **type_header, **headers},
-                                cookies={**self._cookies, **cookies}, data=data, **kwargs)
+                r = await client.patch(url, 
+                                       headers={**self._headers, **type_header, **headers}, 
+                                       cookies={**self._cookies, **cookies}, 
+                                       params=params, data=data, json=json, **kwargs)
             elif method.lower() == 'delete':
-                r = await client.delete(url, headers={**self._headers, **type_header, **headers},
-                                cookies={**self._cookies, **cookies}, data=data, **kwargs)
+                r = await client.delete(url, 
+                                        headers={**self._headers, **type_header, **headers}, 
+                                        cookies={**self._cookies, **cookies}, 
+                                        params=params, data=data, json=json, **kwargs)
             
         self._set_cookies(r)
+        self._add_history(r)
+
         return r
     
     # ------------------------------------------------------------------------
-    # Cookie Management
-    def add_cookies(self, cookies:dict) -> None:
-        self._cookies.update(cookies)
-
-    def get_cookie(self, k:str) -> str:
-        return self._cookies.get(k, '')
-
-    def _set_cookies(self, r:httpx.Response) -> None:
-        self._cookies.update(dict(r.cookies))
-
-    def _reset_cookies(self, keys:list=[]) -> None:
-        self._cookies = {k: self._cookies[k] for k in keys}
+    # History Functions
+    def _add_history(self, r):
+        if self.history_manager:
+            self.history_manager.add_history(r)
     
-    def _save_cookies(self) -> None:
-        try:
-            open(self._cookie_path, 'w').write('\n'.join(['{}={}'.format(k, v) for k, v in self._cookies.items()]))
-        except:
-            ...
-        
-    def _load_cookies(self) -> dict:
-        for l in open(self._cookie_path, 'r').readlines():
-            _idx = l.index('=')
-            self._cookies.update({l[:_idx]: l[_idx+1:].rstrip()})
-
+    def get_histories(self) -> list:
+        return self.history_manager.get_histories() if self.history_manager else []
+    
     # ------------------------------------------------------------------------
     # Utils
     @staticmethod
