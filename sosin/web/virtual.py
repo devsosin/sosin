@@ -75,9 +75,10 @@ class VirtualDriver:
         셀레니움 웹드라이버 실행
         """
         if self.engine == 'chrome':
-            driver = webdriver.Chrome(service=Service(
-                ChromeDriverManager(chrome_type=ChromeType.CHROMIUM if is_chromium else ChromeType.GOOGLE).install()), 
-                options=self.options)
+            service = Service(
+                ChromeDriverManager(chrome_type=ChromeType.CHROMIUM if is_chromium else ChromeType.GOOGLE).install())
+            service.path = service.path.replace('THIRD_PARTY_NOTICES.chromedriver', 'chromedriver.exe')
+            driver = webdriver.Chrome(service=service, options=self.options)
             driver.maximize_window()
             driver.implicitly_wait(5)
             return driver
