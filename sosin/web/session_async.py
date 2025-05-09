@@ -16,11 +16,12 @@ class AsyncSessionManager(CookieManager):
 
     history:list[httpx.Response] = []
 
-    def __init__(self, cookie_path:str=None, history_mode:bool=False) -> None:
+    def __init__(self, cookie_path:str=None, history_mode:bool=False, timeout:int=5) -> None:
         self._headers = { 'User-Agent': 'Mozilla/5.0' }
         super().__init__(cookie_path)
         self.history_manager = HistoryManager() if history_mode else None
-    
+        self.timeout = httpx.Timeout(timeout)
+
     # ------------------------------------------------------------------------
     # Request Management
     async def get(self, 
@@ -129,7 +130,7 @@ class AsyncSessionManager(CookieManager):
             type_header['content-type'] = data.content_type
             type_header['connection'] = 'keep-alive'
 
-        async with httpx.AsyncClient(verify=kwargs.pop('verify', True)) as client:
+        async with httpx.AsyncClient(verify=kwargs.pop('verify', True), timeout=self.timeout) as client:
             if method.lower() == 'get':
                 r = await client.get(url, 
                                      headers={**self._headers, **type_header, **headers}, 
